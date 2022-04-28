@@ -1,25 +1,32 @@
 package com.mandiri.service;
 
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.text.Element;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.*;
-//import javafx.scene.control.Cell;
-//import javafx.scene.text.Text;
+import com.mandiri.dto.ValueDto;
+import com.mandiri.entity.Parameter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.List;
+
 import com.itextpdf.text.Document;
-import com.itextpdf.text.Paragraph;
+import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.borders.Border;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.UnitValue;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.layout.element.Table;
-//import javafx.scene.text.Font;
+
 @Service
 public class PdfGeneratorService {
+    @Autowired
+    ParameterService parameterService;
 
     public void createPdf(){
         try {
@@ -32,32 +39,35 @@ public class PdfGeneratorService {
             //Create PDFWriter instance.
             PdfWriter pw = PdfWriter.getInstance(document, outputStream);
 
+
             //Open the document.
             document.open();
 
             //set page size
             document.setPageSize(PageSize.A4);
             document.setMargins(4, 3, 3, 3);
-            //Add content to the document.
-//            document.add(new Paragraph("Name: "));
-//            document.add(new Paragraph("NIK: "));
-//            document.add(new Paragraph("Address : "));
-//            document.add(new Paragraph("Phone Number: "));
-//            document.add(new Paragraph("Nama: "));
-//
-            PdfPTable table = new PdfPTable(2);
-            table.setWidths(new int[]{2, 6});
-            table.addCell("Name: ");
-            table.addCell("");
-            table.addCell("NIK:");
-            table.addCell("");
-            table.addCell("Address:");
-            table.addCell("");
-            table.addCell("Email:");
-            table.addCell("");
-            table.addCell("Phone Number:");
-            table.addCell("");
-            document.add(table);
+
+            List<Parameter> parameterList = parameterService.getAll();
+            BaseFont baseFont = BaseFont.createFont(
+                    BaseFont.TIMES_ROMAN,
+                    BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+            PdfContentByte cb = pw.getDirectContent();
+            cb.beginText();
+            //Set text font and size.
+            for(Parameter parameter:parameterList){
+                cb.setFontAndSize(baseFont, parameter.getSize());
+                cb.setTextMatrix(parameter.getX(), parameter.getY());
+                //Write text
+                cb.showText(parameter.getParam()+":");
+            }
+            cb.endText();
+//            PdfPTable table = new PdfPTable(2);
+//            table.setWidths(new int[]{2, 6});
+//            for(Parameter param:parameterList){
+//                table.addCell(param.getParam());
+//                table.addCell("");
+//            }
+//            document.add(table);
 
             //Close document and outputStream.
             document.close();
@@ -68,7 +78,7 @@ public class PdfGeneratorService {
             e.printStackTrace();
         }
     }
-    public void writePdf(){
+    public void writePdf(ValueDto valueDto){
         try {
             //Create PdfReader instance.
             PdfReader pdfReader =
@@ -95,11 +105,34 @@ public class PdfGeneratorService {
                 pageContentByte.beginText();
                 //Set text font and size.
                 pageContentByte.setFontAndSize(baseFont, 14);
-
-                pageContentByte.setTextMatrix(10, 798);
-
+                pageContentByte.setTextMatrix(200, 795);
                 //Write text
-                pageContentByte.showText("w3spoint.com");
+                pageContentByte.showText(valueDto.getName());
+
+                //Set text font and size.
+                pageContentByte.setFontAndSize(baseFont, 14);
+                pageContentByte.setTextMatrix(200, 779);
+                //Write text
+                pageContentByte.showText(valueDto.getNik());
+
+                //Set text font and size.
+                pageContentByte.setFontAndSize(baseFont, 14);
+                pageContentByte.setTextMatrix(200, 763);
+                //Write text
+                pageContentByte.showText(valueDto.getAddress());
+
+                //Set text font and size.
+                pageContentByte.setFontAndSize(baseFont, 14);
+                pageContentByte.setTextMatrix(200, 747);
+                //Write text
+                pageContentByte.showText(valueDto.getEmail());
+
+
+                //Set text font and size.
+                pageContentByte.setFontAndSize(baseFont, 14);
+                pageContentByte.setTextMatrix(200, 731);
+                //Write text
+                pageContentByte.showText(valueDto.getPhone());
                 pageContentByte.endText();
             }
 
